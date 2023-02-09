@@ -1,0 +1,38 @@
+---
+- include_tasks: update_apt_cache_and_prepare_download_dir.yaml
+- include_tasks: gather_facts.yaml
+- include_tasks: snap.yaml
+  when: use_snap
+- include_tasks: basic_packages.yaml
+- include_tasks: git.yaml
+- include_tasks: zsh.yaml
+#- include_tasks: fonts.yaml
+- include_tasks: node.yaml
+# - include_tasks: i3.yaml
+#- include_tasks: vpn.yaml
+#- include_tasks: themes.yaml
+#- include_tasks: undervolt.yaml
+- include_tasks: docker.yaml
+  when: docker
+- include_tasks: dev_tools.yaml
+  when: dev_tools
+#- include_tasks: nvim.yaml
+#- include_tasks: general_use_software.yaml
+#- include_tasks: gaming_software.yaml
+#- include_tasks: libinput_gestures.yaml
+#- include_tasks: themes.yaml
+  when: ansible_distribution == 'Linux Mint'
+- include_tasks: dconf.yaml
+  when: ansible_distribution == 'Linux Mint'
+- include_tasks: delete_downloaded_files.yaml
+#- include_tasks: clean_apt.yaml
+
+- name: Undervolt
+  include_tasks: undervolt.yaml
+  when: undervolt
+
+
+- name: display post install message
+  ansible.builtin.debug:
+    msg:
+      - 'Installation complete. Please restart your machine.'

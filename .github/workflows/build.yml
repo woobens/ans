@@ -1,0 +1,19 @@
+name: Build status
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: "${{ matrix.os }}"
+    strategy:
+      matrix:
+        os:
+          - ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run ansible playbook
+        run: cd ${{ github.workspace }} && ansible-playbook ./playbook.yml -K -e username=$(whoami) -e all=true

@@ -1,0 +1,42 @@
+username: vagrant
+vagrant_username: vagrant
+git_user_name: Goran Ninkovic
+git_user_email: change@me.com
+git_set_user_data: false
+# Undervolt
+undervolt: false
+use_snap: false
+dev_tools: false
+docker: false
+all: false
+
+# User directories
+user_home: "/home/{{ username }}"
+libinput_home: "{{ user_home }}/.libinput-gestures"
+local_bin: "{{ user_home }}/.local/bin"
+powerlevel_10k: "{{ user_home }}/.powerlevel10k"
+config_home: "{{ user_home }}/.config/"
+autostart_path: "{{ config_home }}/autostart"
+terminator_config_dir: "{{ config_home }}/terminator"
+themes: "{{ user_home }}/.themes/"
+
+# User files
+antibody_file_path: "{{ user_home }}/.antibody.sh"
+zshrc: "{{ user_home }}/.zshrc"
+terminator_config_file: "{{ terminator_config_dir }}/config"
+
+# System directories
+systemd_system: "/etc/systemd/system/"
+profile: "/etc/profile"
+sysfs: "/etc/sysfs.conf"
+snap_bin_path: "/snap/bin"
+
+# Download directory
+download_dir: "/tmp/ansible"
+
+# System files
+docker_compose: "/usr/local/bin/docker-compose"
+
+# NVIM
+nvim_plugin_manager_path: "{{ user_home }}/.local/share/nvim/site/autoload"
+nvim_config_path: "{{ user_home }}/.config/nvim"

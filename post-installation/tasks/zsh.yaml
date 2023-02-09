@@ -1,0 +1,49 @@
+---
+- name: Install zsh
+  ansible.builtin.apt:
+    name: zsh
+
+- name: Save ZSH install location into a variable
+  ansible.builtin.shell: which zsh
+  register: zsh_install_path
+
+- name: Set ZSH as default login shell for current user
+  ansible.builtin.user:
+    name: "{{ username }}"
+    shell: "{{ zsh_install_path.stdout }}"
+
+
+- name: Initialize .zshrc
+  ansible.builtin.copy:
+    src: ./defaults/.zshrc
+    dest: "{{ zshrc }}"
+    mode: 0644
+  become_user: "{{ username }}"
+
+- name: Copy .p10k.zsh
+  ansible.builtin.copy:
+    src: ./defaults/.p10k.zsh
+    dest: "{{ user_home }}"
+    mode: 0644
+  become_user: "{{ username }}"
+
+- name: Download and install antidote - ZSH plugin manager
+  block:
+    - name: Download antidote
+      ansible.builtin.shell: |
+        zsh -c "cd ~ && rm -rf ${ZDOTDIR:-~}/.antidote && git clone --depth=1 https://github.com/mattmc3/antidote.git ${ZDOTDIR:-~}/.antidote"
+      become_user: "{{ username }}"
+
+- name: Configure antidote
+  block:
+    - name: Copy .zsh_plugins.txt
+      ansible.builtin.copy:
+        src: ./defaults/.zsh_plugins.txt
+        dest: "{{ user_home }}"
+        mode: 0644
+      become_user: "{{ username }}"
+
+    - name: Download antidote bundles from .zsh_plugins.txt
+      ansible.builtin.shell:
+        cmd: zsh -ic "antidote bundle <~/.zsh_plugins.txt >~/.zsh_plugins.zsh"
+      become_user: "{{ username }}"

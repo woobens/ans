@@ -1,0 +1,50 @@
+---
+- name: Add user to input group
+  ansible.builtin.user:
+    name: "{{ username }}"
+    groups: input
+    append: true
+
+- name: "ansible.builtin.apt: Install libinput-gestures dependencies"
+  ansible.builtin.apt:
+    name:
+      - xdotool
+      - wmctrl
+      - libinput-tools
+
+- name: Install the libinput-gestures conf file
+  ansible.builtin.copy:
+    src: ./defaults/.config/libinput-gestures.conf
+    dest: "{{ config_home }}"
+    mode: 0644
+  become_user: "{{ username }}"
+
+- name: Check if repo is cloned
+  ansible.builtin.stat:
+    path: "{{ libinput_home }}"
+  register: libinput_directory
+
+- name: Clone libinput-gestures repo
+  ansible.builtin.git:
+    repo: https://github.com/bulletmark/libinput-gestures.git
+    dest: "{{ libinput_home }}"
+    clone: true
+    update: true
+    force: true
+  become_user: "{{ username }}"
+  when: not libinput_directory.stat.exists
+
+- name: Make libinput-gestures
+  ansible.builtin.make:
+    chdir: "{{ libinput_home }}/"
+    target: install
+
+- name: Set libinput-gestures to autostart on OS boot
+  ansible.builtin.shell: |
+    libinput-gestures-setup autostart
+  become_user: "{{ username }}"
+
+- name: Run libinput-gestures
+  ansible.builtin.shell: |
+    libinput-gestures-setup start
+  become_user: "{{ username }}"

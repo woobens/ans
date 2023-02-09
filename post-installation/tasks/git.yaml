@@ -1,0 +1,84 @@
+---
+- name: Install git
+  ansible.builtin.apt:
+    name:
+      - git
+
+- name: Save current git name
+  git_config:
+    name: "user.name"
+    scope: global
+  become_user: "{{ username }}"
+  register: current_git_name
+
+- name: Save current git email
+  git_config:
+    name: "user.email"
+    scope: global
+  become_user: "{{ username }}"
+  register: current_git_email
+
+- name: Copy .gitconfig file
+  ansible.builtin.copy:
+    src: ./defaults/.gitconfig
+    dest: "~"
+    mode: 0644
+  become_user: "{{ username }}"
+
+- name: Copy .git-templates directory
+  ansible.builtin.copy:
+    src: ./defaults/.git-templates
+    dest: "~"
+    mode: 0755
+  become_user: "{{ username }}"
+
+- name: Download and install delta
+  block:
+    - include_tasks: download_github_asset.yaml
+      vars:
+        github_repo: dandavison/delta
+        github_asset: delta
+        github_asset_dest: "{{ download_dir }}/delta"
+        type: deb
+
+    - name: Install delta
+      ansible.builtin.apt:
+        deb: "{{ download_dir }}/delta.deb"
+        force: true
+
+- block:
+    - name: Configure git user name
+      git_config:
+        name: "user.name"
+        value: "{{ git_user_name }}"
+        scope: global
+        state: present
+      become_user: "{{ username }}"
+
+    - name: Configure git user email
+      git_config:
+        name: "user.email"
+        value: "{{ git_user_email }}"
+        scope: global
+        state: present
+      become_user: "{{ username }}"
+  when: git_set_user_data == True
+
+# Restore git user data since copying the .gitconfig above will overwrite it
+- block:
+    - name: Revert old git user name
+      git_config:
+        name: "user.name"
+        value: "{{ current_git_name.config_value }}"
+        scope: global
+        state: present
+      become_user: "{{ username }}"
+
+    - name: Revert old git user email
+      git_config:
+        name: "user.email"
+        value: "{{ current_git_email.config_value }}"
+        scope: global
+        state: present
+      become_user: "{{ username }}"
+  when: git_set_user_data == False

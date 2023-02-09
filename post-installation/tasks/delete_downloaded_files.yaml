@@ -1,0 +1,5 @@
+---
+- name: "Delete directory: {{ download_dir }}"
+  ansible.builtin.file:
+    state: absent
+    path: "{{ download_dir }}"
